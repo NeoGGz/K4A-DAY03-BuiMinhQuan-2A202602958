@@ -4,6 +4,7 @@ Mã nguồn chứa danh sách Tool Schemas (JSON Schema) và Execution Layer ph�
 """
 
 import json
+import math
 from typing import Dict, Any
 
 # ==============================================================================
@@ -82,9 +83,11 @@ TOOLS_SCHEMA = [
                 }
             },
             "required": [
-                "calorie_target",
-                "protein_target",
-                "budget"
+                "age",
+                "height_cm",
+                "weight_kg",
+                "target_weight_kg",
+                "workout_days_per_week"
             ]
         }
     }
@@ -121,32 +124,87 @@ def execute_nutrition_query(food_name: str, serving_size: str) -> str:
 
 
 def execute_create_meal_plan(
-    calorie_target: float,
-    protein_target: float,
-    budget: float,
+    calorie_target: float = None,
+    protein_target: float = None,
+    budget: float = None,
     dietary_preferences: str = "",
-    age: int = 0,
-    height_cm: float = 0,
-    weight_kg: float = 0,
-    target_weight_kg: float = 0,
-    workout_days_per_week: int = 0,
+    age: int = None,
+    height_cm: float = None,
+    weight_kg: float = None,
+    target_weight_kg: float = None,
+    workout_days_per_week: int = None,
     pre_workout_meal: bool = True
 ) -> str:
     """Tạo thực đơn mẫu theo mục tiêu dinh dưỡng của người dùng."""
+    missing_fields = []
+    if age is None or age <= 0:
+        missing_fields.append("tuổi")
+    if height_cm is None or height_cm <= 0:
+        missing_fields.append("chiều cao")
+    if weight_kg is None or weight_kg <= 0:
+        missing_fields.append("cân nặng hiện tại")
+    if target_weight_kg is None or target_weight_kg <= 0:
+        missing_fields.append("cân nặng mục tiêu")
+    if workout_days_per_week is None:
+        missing_fields.append("số buổi tập mỗi tuần")
+    if missing_fields:
+        return json.dumps({
+            "status": "VALIDATION_ERROR",
+            "message": "Vui lòng bổ sung thông tin sức khỏe bắt buộc: " + ", ".join(missing_fields) + "."
+        }, ensure_ascii=False)
+
     preferences = dietary_preferences or "Không có yêu cầu đặc biệt"
-    plan = [
+    current_weight = weight_kg
+    user_age = age
+    user_height = height_cm
+    activity_factor = 1.2 + min(workout_days_per_week, 7) * 0.05
+    estimated_bmr = 10 * current_weight + 6.25 * user_height - 5 * user_age + 5
+    estimated_calories = calorie_target or round(estimated_bmr * activity_factor + 300)
+    estimated_protein = protein_target or round((target_weight_kg or current_weight) * 1.6)
+    estimated_budget = budget if budget is not None else round(estimated_calories * 45, -3)
+    base_plan = [
         {"meal": "Bữa sáng", "items": "2 trứng gà, 1 quả chuối, 1 hộp sữa chua", "calories": 436},
         {"meal": "Bữa trưa", "items": "150g ức gà, 1 bát cơm trắng, rau xanh", "calories": 428},
         {"meal": "Bữa trước tập", "items": "1 quả chuối, 1 hộp sữa chua và 2 lát bánh mì nguyên cám; dùng trước tập 60-90 phút", "calories": 310},
         {"meal": "Bữa tối", "items": "100g ức gà, 1 bát cơm trắng, rau xanh", "calories": 345}
     ]
+    base_total_calories = sum(meal["calories"] for meal in base_plan)
+    plan = [dict(meal, calories=round(meal["calories"] * estimated_calories / base_total_calories)) for meal in base_plan]
+    calorie_difference = estimated_calories - estimated_bmr * activity_factor
+    weekly_gain = min(max(calorie_difference * 7 / 7700, 0), 0.5)
+    weight_gap = max(target_weight_kg - current_weight, 0)
+    if weight_gap == 0:
+        progress_estimate = {
+            "status": "AT_TARGET",
+            "message": "Cân nặng hiện tại đã bằng hoặc cao hơn cân nặng mục tiêu."
+        }
+    elif weekly_gain > 0:
+        estimated_weeks = math.ceil(weight_gap / weekly_gain)
+        progress_estimate = {
+            "status": "ESTIMATED",
+            "weight_gap_kg": round(weight_gap, 1),
+            "maintenance_calories": round(estimated_bmr * activity_factor),
+            "daily_surplus_calories": round(calorie_difference),
+            "expected_gain_kg_per_week": round(weekly_gain, 2),
+            "estimated_weeks": estimated_weeks,
+            "estimated_months": round(estimated_weeks / 4.345, 1),
+            "message": f"Nếu duy trì đều, dự kiến khoảng {estimated_weeks} tuần ({estimated_weeks / 4.345:.1f} tháng) để đạt mục tiêu."
+        }
+    else:
+        progress_estimate = {
+            "status": "NO_SURPLUS",
+            "maintenance_calories": round(estimated_bmr * activity_factor),
+            "daily_surplus_calories": round(calorie_difference),
+            "message": "Khẩu phần hiện tại chưa tạo thặng dư calories, nên chưa thể dự báo tăng cân tới mục tiêu."
+        }
     total_plan_calories = sum(meal["calories"] for meal in plan)
     return json.dumps({
         "status": "SUCCESS",
         "target": {
-            "calories": calorie_target,
-            "protein_g": protein_target,
-            "budget_vnd": budget,
+            "calories": estimated_calories,
+            "protein_g": estimated_protein,
+            "budget_vnd": estimated_budget,
+            "budget_note": "Ngân sách được ước tính theo tổng calories và giá nguyên liệu phổ biến." if budget is None else "",
             "dietary_preferences": preferences,
             "profile": {
                 "age": age,
@@ -159,6 +217,7 @@ def execute_create_meal_plan(
         },
         "plan": plan,
         "total_plan_calories": total_plan_calories,
+        "progress_estimate": progress_estimate,
         "note": "Đây là thực đơn mẫu; cần chuyên gia dinh dưỡng tư vấn cho tình trạng y tế cụ thể."
     }, ensure_ascii=False)
 

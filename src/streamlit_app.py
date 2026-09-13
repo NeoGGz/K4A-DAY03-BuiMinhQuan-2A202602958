@@ -40,14 +40,14 @@ def initialize_state():
         st.session_state.trace = []
     if "profile" not in st.session_state:
         st.session_state.profile = {
-            "age": 21,
-            "height_cm": 170.0,
-            "weight_kg": 50.0,
-            "target_weight_kg": 70.0,
-            "workout_days_per_week": 5,
-            "calorie_target": 2800,
-            "protein_target": 130,
-            "budget": 120000,
+            "age": None,
+            "height_cm": None,
+            "weight_kg": None,
+            "target_weight_kg": None,
+            "workout_days_per_week": None,
+            "calorie_target": None,
+            "protein_target": None,
+            "budget": None,
             "dietary_preferences": "",
         }
 
@@ -58,8 +58,10 @@ def build_context(profile):
         f"tuổi {profile['age']}, cao {profile['height_cm']} cm, "
         f"nặng {profile['weight_kg']} kg, mục tiêu {profile['target_weight_kg']} kg, "
         f"tập gym {profile['workout_days_per_week']} buổi/tuần, "
-        f"mục tiêu {profile['calorie_target']} kcal và {profile['protein_target']}g protein/ngày, "
-        f"ngân sách {profile['budget']} VNĐ/ngày, sở thích: {profile['dietary_preferences'] or 'không có'}."
+        f"mục tiêu calories: {profile['calorie_target'] if profile['calorie_target'] else 'chưa xác định, hãy tự ước tính'}, "
+        f"protein: {profile['protein_target'] if profile['protein_target'] else 'chưa xác định, hãy tự ước tính'}, "
+        f"ngân sách: {f'{profile["budget"]:,} VNĐ/ngày' if profile['budget'] else 'chưa xác định, hãy tối ưu theo mức hợp lý'}, "
+        f"sở thích: {profile['dietary_preferences'] or 'không có'}."
         " Nếu người dùng yêu cầu thực đơn, hãy tạo đúng 4 bữa gồm sáng, trưa, trước tập và tối."
     )
 
@@ -82,6 +84,16 @@ def render_plan(plan_data):
         f"{target.get('protein_g', 0):,.0f}g protein · "
         f"Tổng mẫu {plan_data.get('total_plan_calories', 0):,.0f} kcal"
     )
+    progress = plan_data.get("progress_estimate", {})
+    if progress.get("status") == "ESTIMATED":
+        st.info(
+            f"Dự kiến đạt mục tiêu sau khoảng **{progress['estimated_weeks']} tuần "
+            f"({progress['estimated_months']} tháng)** nếu duy trì đều. "
+            f"Tốc độ ước tính: {progress['expected_gain_kg_per_week']} kg/tuần.",
+            icon=":material/timeline:"
+        )
+    elif progress.get("message"):
+        st.warning(progress["message"], icon=":material/warning:")
     for meal in plan_data.get("plan", []):
         with st.container(border=True):
             left, right = st.columns([4, 1], vertical_alignment="center")
@@ -116,18 +128,22 @@ with st.sidebar:
 
     with st.form("profile_form", border=True):
         st.subheader("Hồ sơ của bạn", icon=":material/person:")
-        profile["age"] = st.number_input("Tuổi", min_value=13, max_value=100, value=profile["age"])
-        profile["height_cm"] = st.number_input("Chiều cao (cm)", min_value=100.0, max_value=230.0, value=profile["height_cm"])
-        profile["weight_kg"] = st.number_input("Cân nặng hiện tại (kg)", min_value=25.0, max_value=300.0, value=profile["weight_kg"])
-        profile["target_weight_kg"] = st.number_input("Cân nặng mục tiêu (kg)", min_value=25.0, max_value=300.0, value=profile["target_weight_kg"])
-        profile["workout_days_per_week"] = st.slider("Số buổi gym / tuần", 0, 7, profile["workout_days_per_week"])
-        profile["calorie_target"] = st.number_input("Mục tiêu calories mỗi ngày", min_value=1000, max_value=6000, value=profile["calorie_target"], step=50)
-        profile["protein_target"] = st.number_input("Mục tiêu protein mỗi ngày (g)", min_value=30, max_value=400, value=profile["protein_target"], step=5)
-        profile["budget"] = st.number_input("Ngân sách mỗi ngày (VNĐ)", min_value=0, max_value=1000000, value=profile["budget"], step=10000)
+        profile["age"] = st.number_input("Tuổi *", min_value=13, max_value=100, value=profile["age"], placeholder="Bắt buộc nhập")
+        profile["height_cm"] = st.number_input("Chiều cao (cm) *", min_value=100.0, max_value=230.0, value=profile["height_cm"], placeholder="Bắt buộc nhập")
+        profile["weight_kg"] = st.number_input("Cân nặng hiện tại (kg) *", min_value=25.0, max_value=300.0, value=profile["weight_kg"], placeholder="Bắt buộc nhập")
+        profile["target_weight_kg"] = st.number_input("Cân nặng mục tiêu (kg) *", min_value=25.0, max_value=300.0, value=profile["target_weight_kg"], placeholder="Bắt buộc nhập")
+        profile["workout_days_per_week"] = st.number_input("Số buổi gym / tuần *", min_value=0, max_value=7, value=profile["workout_days_per_week"], placeholder="Bắt buộc nhập")
+        profile["calorie_target"] = st.number_input("Mục tiêu calories mỗi ngày (không bắt buộc)", min_value=1000, max_value=6000, value=profile["calorie_target"], step=50, placeholder="Để trống để trợ lý tự ước tính")
+        profile["protein_target"] = st.number_input("Mục tiêu protein mỗi ngày (g, không bắt buộc)", min_value=30, max_value=400, value=profile["protein_target"], step=5, placeholder="Để trống để trợ lý tự ước tính")
+        profile["budget"] = st.number_input("Ngân sách mỗi ngày (không bắt buộc)", min_value=0, max_value=1000000, value=profile["budget"], step=10000, placeholder="Để trống để trợ lý tự chọn mức hợp lý")
         profile["dietary_preferences"] = st.text_area("Sở thích ăn uống", value=profile["dietary_preferences"], placeholder="Không ăn cá, thích món dễ nấu...")
         if st.form_submit_button("Lưu hồ sơ", type="primary", icon=":material/save:"):
-            st.session_state.profile = profile
-            st.toast("Đã lưu hồ sơ", icon=":material/check:")
+            required_profile = ["age", "height_cm", "weight_kg", "target_weight_kg", "workout_days_per_week"]
+            if any(profile[field] is None for field in required_profile):
+                st.error("Vui lòng nhập đầy đủ thông tin sức khỏe bắt buộc (*).")
+            else:
+                st.session_state.profile = profile
+                st.toast("Đã lưu hồ sơ", icon=":material/check:")
 
     st.space("small")
     if st.button("Xóa cuộc trò chuyện", icon=":material/delete_sweep:", width="stretch"):
@@ -138,6 +154,11 @@ with st.sidebar:
 
 st.title("Xây dựng một ngày ăn uống tốt hơn", anchor=False)
 st.write("Không gian dinh dưỡng tập trung vào thể trạng, lịch tập và thói quen của bạn.")
+
+required_profile = ["age", "height_cm", "weight_kg", "target_weight_kg", "workout_days_per_week"]
+profile_complete = all(profile[field] is not None for field in required_profile)
+if not profile_complete:
+    st.warning("Hãy nhập và lưu tuổi, chiều cao, cân nặng, cân nặng mục tiêu và số buổi tập trước khi yêu cầu thực đơn.", icon=":material/priority_high:")
 
 chat_col, plan_col = st.columns([1.45, 1], gap="large")
 
@@ -162,6 +183,9 @@ with chat_col:
     prompt = prompt or pending_prompt
 
     if prompt:
+        if not profile_complete:
+            st.error("Chưa thể tạo thực đơn: bạn cần hoàn thành hồ sơ sức khỏe ở thanh bên.")
+            st.stop()
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user", avatar=":material/person:"):
             st.markdown(prompt)
@@ -191,6 +215,10 @@ with plan_col:
 
     with st.container(border=True):
         st.subheader("Tổng quan nhanh", icon=":material/insights:")
-        bmi = profile["weight_kg"] / ((profile["height_cm"] / 100) ** 2)
-        st.metric("BMI hiện tại", f"{bmi:.1f}")
+        if profile["weight_kg"] and profile["height_cm"]:
+            bmi = profile["weight_kg"] / ((profile["height_cm"] / 100) ** 2)
+            bmi_label = f"{bmi:.1f}"
+        else:
+            bmi_label = "Chưa đủ dữ liệu"
+        st.metric("BMI hiện tại", bmi_label)
         st.caption("Các ước tính dinh dưỡng chỉ mang tính tham khảo. Hãy hỏi chuyên gia nếu bạn có bệnh nền hoặc yêu cầu y tế đặc biệt.")

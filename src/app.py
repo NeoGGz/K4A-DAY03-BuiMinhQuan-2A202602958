@@ -136,7 +136,8 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPNutritionServer) -
                             f"Thực đơn tham khảo (mục tiêu {target.get('calories', 0)} kcal, "
                             f"{target.get('protein_g', 0)}g protein/ngày)\n"
                             f"{meals}\n"
-                            f"Tổng thực đơn mẫu: {obs_data.get('total_plan_calories', 0)} kcal."
+                            f"Tổng thực đơn mẫu: {obs_data.get('total_plan_calories', 0)} kcal.\n"
+                            f"Dự báo tiến độ: {obs_data.get('progress_estimate', {}).get('message', 'Chưa có dữ liệu dự báo.')}"
                         )
                     elif "message" in obs_data:
                         final_answer = obs_data["message"]

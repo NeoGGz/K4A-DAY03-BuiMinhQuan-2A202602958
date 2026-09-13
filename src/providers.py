@@ -6,6 +6,7 @@ Hỗ trợ Native Tool Calling và chuyển đổi linh hoạt qua biến môi t
 import os
 import sys
 import json
+import re
 from typing import Dict, Any, List
 from dotenv import load_dotenv
 
@@ -39,22 +40,35 @@ class MockOfflineProvider(BaseLLMProvider):
         
         # Mô phỏng nhận diện intent gọi Tool dinh dưỡng
         if any(keyword in prompt_lower for keyword in ["thực đơn", "meal plan", "tăng cân", "giảm cân", "ngân sách"]):
+            weight_match = re.search(r"nặng\s*(\d+(?:[.,]\d+)?)\s*kg", prompt_lower)
+            target_weight_match = re.search(r"mục tiêu\s*(\d+(?:[.,]\d+)?)\s*kg", prompt_lower)
+            workout_match = re.search(r"tập gym\s*(\d+)\s*buổi", prompt_lower)
+            age_match = re.search(r"(?:tuổi\s*(\d+)|(\d+)\s*tuổi)", prompt_lower)
+            height_match = re.search(r"cao\s*(?:(\d+(?:[.,]\d+)?)\s*m\s*(\d+)?|(\d+(?:[.,]\d+)?)\s*cm)", prompt_lower)
+            height_cm = 0
+            if height_match:
+                if height_match.group(1):
+                    height_cm = float(height_match.group(1).replace(",", ".")) * 100
+                    if height_match.group(2):
+                        height_cm += float(height_match.group(2))
+                else:
+                    height_cm = float(height_match.group(3).replace(",", "."))
             return {
                 "type": "tool_call",
                 "tool_name": "create_meal_plan",
                 "arguments": {
-                    "calorie_target": 2800,
-                    "protein_target": 130,
-                    "budget": 120000,
+                    "calorie_target": None,
+                    "protein_target": None,
+                    "budget": None,
                     "dietary_preferences": "",
-                    "age": 21,
-                    "height_cm": 170,
-                    "weight_kg": 50,
-                    "target_weight_kg": 70,
-                    "workout_days_per_week": 5,
+                    "age": int(age_match.group(1) or age_match.group(2)) if age_match else 0,
+                    "height_cm": height_cm,
+                    "weight_kg": float(weight_match.group(1).replace(",", ".")) if weight_match else 0,
+                    "target_weight_kg": float(target_weight_match.group(1).replace(",", ".")) if target_weight_match else 0,
+                    "workout_days_per_week": int(workout_match.group(1)) if workout_match else 0,
                     "pre_workout_meal": True
                 },
-                "thought": "Người dùng muốn tăng cân và tập gym. Tôi sẽ gọi create_meal_plan với một bữa trước tập riêng."
+                "thought": "Người dùng muốn một thực đơn cá nhân hóa. Tôi sẽ để hệ thống tự ước tính calories, protein và ngân sách từ hồ sơ."
             }
         elif "xyz" in prompt_lower:
             return {
