@@ -4,8 +4,8 @@ Học viên có thể chọn **1 đề tài gợi ý** theo các lĩnh vực dư
 
 ---
 
-### 🎓 1. Lĩnh vực Giáo dục & Đào tạo (Education & Academics)
-* **Gợi ý 1.1:** *Trợ lý Học vụ & Tra cứu Lịch thi VinUni:* Tra cứu điểm GPA, lịch thi và đặt lịch tư vấn học vụ với Cố vấn.
+### 🥗 1. Lĩnh vực Dinh dưỡng & Sức khỏe (Nutrition & Wellness)
+* **Gợi ý 1.1:** *Trợ lý AI xây dựng thực đơn dinh dưỡng cá nhân hóa:* Tra cứu calories, macronutrients và tạo thực đơn theo mục tiêu, ngân sách và sở thích.
 * **Gợi ý 1.2:** *Trợ lý Quản lý Thư viện & Tài liệu:* Tra cứu vị trí sách, tình trạng mượn/trả và gia hạn tài liệu.
 
 ### 🏢 2. Lĩnh vực Quản trị Nhân sự & Vận hành Nội bộ (HR & Operations)

@@ -111,7 +111,7 @@ graph TD
 
 ### 🚩 CHECKPOINT 1 (Mốc phút 30)
 - **Tín hiệu hoàn thành (Pass Signal):** Bảng Scoring Matrix trong [`trace_eval.md`](trace_eval.md) được điền đầy đủ điểm và giải trình. File `config/test_cases.json` không còn dòng `TODO`.
-- **Nếu bạn bị chậm:** Chọn ngay Chủ đề 1.1 (Trợ lý Học vụ Sinh viên VinUni) có sẵn và điền nhanh điểm số để chuyển tiếp ngay sang Task 1.2.
+- **Nếu bạn bị chậm:** Chọn ngay chủ đề Trợ lý AI xây dựng thực đơn dinh dưỡng cá nhân hóa và điền nhanh điểm số để chuyển tiếp sang Task 1.2.
 
 ---
 
@@ -121,24 +121,25 @@ graph TD
 Mô hình LLM hiểu công cụ thông qua định dạng cấu trúc JSON Schema. Một Tool Schema chuẩn phải mô tả rõ tên công cụ (`name`), mục đích sử dụng (`description`) và các kiểu dữ liệu của tham số đầu vào (`parameters`).
 
 ### Thao tác thực hành:
-1. Mở tệp `src/tools.py`. Quan sát công cụ mẫu `academic_query` đã được định nghĩa sẵn.
+1. Mở tệp `src/tools.py`. Quan sát hai công cụ dinh dưỡng đã được định nghĩa sẵn.
 2. Tìm mốc `# TODO 1.2` và hoàn thiện khai báo JSON Schema cho công cụ:
-   - `schedule_appointment`: Công cụ đặt lịch hẹn (cần tham số `student_id`, `datetime_str`, `advisor_name`).
+  - `nutrition_query`: Tra cứu calories và macronutrients của thực phẩm (cần `food_name`, `serving_size`).
+  - `create_meal_plan`: Tạo thực đơn theo mục tiêu (cần `calorie_target`, `protein_target`, `budget`).
 
 **Cấu trúc Tool Schema mẫu tham khảo:**
 ```json
 {
-  "name": "academic_query",
-  "description": "Tra cứu hồ sơ và thông tin học vụ của sinh viên VinUni bằng mã sinh viên.",
+  "name": "nutrition_query",
+  "description": "Tra cứu calories và macronutrients của thực phẩm theo khẩu phần.",
   "parameters": {
     "type": "object",
     "properties": {
-      "student_id": {
+      "food_name": {
         "type": "string",
-        "description": "Mã sinh viên cần tra cứu (ví dụ: 'SV2026001')"
+        "description": "Tên thực phẩm cần tra cứu (ví dụ: 'ức gà')"
       }
     },
-    "required": ["student_id"]
+    "required": ["food_name", "serving_size"]
   }
 }
 ```
@@ -153,7 +154,7 @@ Mô hình LLM hiểu công cụ thông qua định dạng cấu trúc JSON Schem
 MCP là tiêu chuẩn mở kết nối giữa Agentic Systems và các nguồn dữ liệu/công cụ bên ngoài. Trong kiến trúc này, công cụ không nằm trong LLM mà được phục vụ độc lập từ MCP Server (`src/mcp_server.py`).
 
 ### Thao tác thực hành:
-1. Mở tệp `src/mcp_server.py` kiểm tra lớp `MCPAcademicServer`.
+1. Mở tệp `src/mcp_server.py` kiểm tra lớp `MCPNutritionServer`.
 2. Tìm mốc `# TODO 2.1` và hoàn thiện hàm `call_tool(self, tool_name, arguments)` nhận yêu cầu, gọi `dispatch_tool_call()` và đóng gói kết quả phản hồi chuẩn JSON-RPC 2.0.
 3. Mở terminal và chạy lệnh kiểm tra MCP Server:
    ```bash
@@ -163,10 +164,10 @@ MCP là tiêu chuẩn mở kết nối giữa Agentic Systems và các nguồn d
 ### 🚩 CHECKPOINT 2 (Mốc phút 70)
 - **Tín hiệu hoàn thành (Pass Signal):** Terminal in ra thông báo:
   ```text
-  ✅ [MCP SERVER] Đã khởi tạo thành công vinuni-academic-mcp-server (Version: 2026.1.0)
+  ✅ [MCP SERVER] Đã khởi tạo thành công nutrition-mcp-server (Version: 2026.1.0)
   📦 Số lượng Tools công bố qua MCP: 2
   ```
-- **Nếu bạn bị chậm:** Kiểm tra lại lỗi cú pháp trong `src/tools.py`. Nếu gặp `SyntaxError`, đối chiếu với Tool Schema mẫu `academic_query` để sửa các dấu ngoặc nhọn `{}`.
+- **Nếu bạn bị chậm:** Kiểm tra lại lỗi cú pháp trong `src/tools.py`. Nếu gặp `SyntaxError`, đối chiếu với JSON Schema của `nutrition_query` để sửa các dấu ngoặc nhọn `{}`.
 
 ---
 

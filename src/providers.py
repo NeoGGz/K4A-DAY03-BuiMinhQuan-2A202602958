@@ -37,26 +37,44 @@ class MockOfflineProvider(BaseLLMProvider):
     def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
         prompt_lower = prompt.lower()
         
-        # Mô phỏng nhận diện intent gọi Tool
-        if "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
+        # Mô phỏng nhận diện intent gọi Tool dinh dưỡng
+        if any(keyword in prompt_lower for keyword in ["thực đơn", "meal plan", "tăng cân", "giảm cân", "ngân sách"]):
             return {
                 "type": "tool_call",
-                "tool_name": "schedule_appointment",
-                "arguments": {"student_id": "SV2026001", "datetime_str": "14:00 15/09/2026", "advisor_name": "PGS.TS Nguyễn Văn A"},
-                "thought": "Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên SV2026001. Tôi sẽ gọi tool schedule_appointment."
+                "tool_name": "create_meal_plan",
+                "arguments": {
+                    "calorie_target": 2800,
+                    "protein_target": 130,
+                    "budget": 120000,
+                    "dietary_preferences": "",
+                    "age": 21,
+                    "height_cm": 170,
+                    "weight_kg": 50,
+                    "target_weight_kg": 70,
+                    "workout_days_per_week": 5,
+                    "pre_workout_meal": True
+                },
+                "thought": "Người dùng muốn tăng cân và tập gym. Tôi sẽ gọi create_meal_plan với một bữa trước tập riêng."
             }
-        elif "sv2026001" in prompt_lower or "tra cứu" in prompt_lower:
+        elif "xyz" in prompt_lower:
             return {
                 "type": "tool_call",
-                "tool_name": "academic_query",
-                "arguments": {"student_id": "SV2026001"},
-                "thought": "Người dùng muốn tra cứu thông tin học vụ của sinh viên SV2026001. Tôi sẽ gọi tool academic_query."
+                "tool_name": "nutrition_query",
+                "arguments": {"food_name": "bánh đặc biệt XYZ", "serving_size": "1 phần"},
+                "thought": "Thực phẩm yêu cầu không nằm trong dữ liệu mẫu. Tôi sẽ kiểm tra bằng nutrition_query."
+            }
+        elif any(keyword in prompt_lower for keyword in ["dinh dưỡng", "calo", "calories", "protein", "ức gà", "trứng", "chuối", "cơm"]):
+            return {
+                "type": "tool_call",
+                "tool_name": "nutrition_query",
+                "arguments": {"food_name": "ức gà", "serving_size": "100g"},
+                "thought": "Người dùng muốn tra cứu dinh dưỡng của thực phẩm. Tôi sẽ gọi tool nutrition_query."
             }
         else:
             return {
                 "type": "text",
-                "content": f"[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-                "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool."
+                "content": "Xin chào! Tôi có thể giúp bạn ước tính calories, protein và xây dựng thực đơn theo mục tiêu, ngân sách và sở thích ăn uống.",
+                "thought": "Câu hỏi chung về dinh dưỡng, trả lời trực tiếp không cần gọi Tool."
             }
 
 

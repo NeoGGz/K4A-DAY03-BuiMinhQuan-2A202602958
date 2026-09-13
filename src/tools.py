@@ -11,41 +11,81 @@ from typing import Dict, Any
 # ==============================================================================
 
 TOOLS_SCHEMA = [
-    # Tool 1: Đã được định nghĩa mẫu sẵn cho Học viên tham khảo
+    # Tool 1: Tra cứu thông tin dinh dưỡng của thực phẩm
     {
-        "name": "academic_query",
-        "description": "Tra cứu hồ sơ và thông tin học vụ của sinh viên VinUni bằng mã sinh viên.",
+        "name": "nutrition_query",
+        "description": "Tra cứu thông tin dinh dưỡng của thực phẩm hoặc món ăn, bao gồm calories, protein, carbohydrate, chất béo và giá tham khảo.",
         "parameters": {
             "type": "object",
             "properties": {
-                "student_id": {
+                "food_name": {
                     "type": "string",
-                    "description": "Mã sinh viên cần tra cứu (ví dụ: 'SV2026001')"
+                    "description": "Tên thực phẩm hoặc món ăn cần tra cứu (ví dụ: 'trứng gà', 'ức gà', 'cơm trắng')"
+                },
+                "serving_size": {
+                    "type": "string",
+                    "description": "Khẩu phần cần tra cứu (ví dụ: '2 quả', '100g', '1 bát')"
                 }
             },
-            "required": ["student_id"]
+            "required": ["food_name", "serving_size"]
         }
     },
-    
+
     # --------------------------------------------------------------------------
-    # TODO 1.2: HỌC VIÊN HOÀN THIỆN TOOL SCHEMA CHO 'schedule_appointment'
-    # 🎯 YÊU CẦU THIẾT KẾ SCHEMA (JSON SCHEMA STANDARD):
-    # 1. Tool dùng để đặt lịch hẹn tư vấn học vụ với Cố vấn học tập VinUni.
-    # 2. Thiết kế các tham số (properties) để LLM trích xuất:
-    #    - student_id (string): Mã sinh viên cần đặt lịch (ví dụ: 'SV2026001')
-    #    - datetime_str (string): Thời gian hẹn (ví dụ: '14:00 15/09/2026')
-    #    - advisor_name (string): Tên cố vấn học tập
-    # 3. Khai báo danh sách các trường bắt buộc (required).
+    # Tool 2: Tạo thực đơn dinh dưỡng cá nhân hóa
     # --------------------------------------------------------------------------
     {
-        "name": "schedule_appointment",
-        "description": "Đặt lịch hẹn tư vấn học vụ với Cố vấn học tập VinUni.",
+        "name": "create_meal_plan",
+        "description": "Tạo thực đơn dinh dưỡng cá nhân hóa dựa trên mục tiêu tăng cân, nhu cầu calories, protein và ngân sách ăn uống của người dùng.",
         "parameters": {
             "type": "object",
             "properties": {
-                # TODO 1.2: Khai báo các thuộc tính tham số cho Tool tại đây...
+                "calorie_target": {
+                    "type": "number",
+                    "description": "Lượng calories mục tiêu mỗi ngày, ví dụ: 2500"
+                },
+                "protein_target": {
+                    "type": "number",
+                    "description": "Lượng protein mục tiêu mỗi ngày tính bằng gram, ví dụ: 100"
+                },
+                "budget": {
+                    "type": "number",
+                    "description": "Ngân sách ăn uống tối đa mỗi ngày, tính bằng VNĐ, ví dụ: 70000"
+                },
+                "dietary_preferences": {
+                    "type": "string",
+                    "description": "Các sở thích, món không thích hoặc yêu cầu đặc biệt về ăn uống, ví dụ: 'không ăn cá, thích thịt gà'"
+                },
+                "age": {
+                    "type": "integer",
+                    "description": "Tuổi của người dùng"
+                },
+                "height_cm": {
+                    "type": "number",
+                    "description": "Chiều cao tính bằng centimet"
+                },
+                "weight_kg": {
+                    "type": "number",
+                    "description": "Cân nặng hiện tại tính bằng kilogram"
+                },
+                "target_weight_kg": {
+                    "type": "number",
+                    "description": "Cân nặng mục tiêu tính bằng kilogram"
+                },
+                "workout_days_per_week": {
+                    "type": "integer",
+                    "description": "Số buổi tập gym mỗi tuần"
+                },
+                "pre_workout_meal": {
+                    "type": "boolean",
+                    "description": "Có cần thêm một bữa trước tập riêng hay không"
+                }
             },
-            "required": [] # TODO 1.2: Khai báo danh sách các trường bắt buộc tại đây...
+            "required": [
+                "calorie_target",
+                "protein_target",
+                "budget"
+            ]
         }
     }
 ]
@@ -54,58 +94,79 @@ TOOLS_SCHEMA = [
 # 2. MÔ PHỎNG DỮ LIỆU & HÀM THỰC THI TOOL (EXECUTION LAYER)
 # ==============================================================================
 
-MOCK_DATABASE = {
-    "SV2026001": {
-        "full_name": "Nguyễn Văn An",
-        "class": "AI-K4",
-        "gpa": 3.85,
-        "email": "an.nv@vinuni.edu.vn",
-        "status": "Đang học",
-        "advisor": "PGS.TS Nguyễn Văn A"
-    },
-    "SV2026002": {
-        "full_name": "Trần Thị Bình",
-        "class": "AI-K4",
-        "gpa": 3.60,
-        "email": "binh.tt@vinuni.edu.vn",
-        "status": "Đang học",
-        "advisor": "TS. Lê Thị B"
-    }
+MOCK_FOOD_DATABASE = {
+    "trứng gà": {"calories": 143, "protein_g": 12.6, "carbs_g": 0.7, "fat_g": 9.5, "price_vnd": 5000},
+    "ức gà": {"calories": 165, "protein_g": 31, "carbs_g": 0, "fat_g": 3.6, "price_vnd": 18000},
+    "cơm trắng": {"calories": 130, "protein_g": 2.7, "carbs_g": 28, "fat_g": 0.3, "price_vnd": 4000},
+    "sữa chua": {"calories": 61, "protein_g": 3.5, "carbs_g": 4.7, "fat_g": 3.3, "price_vnd": 8000},
+    "chuối": {"calories": 89, "protein_g": 1.1, "carbs_g": 22.8, "fat_g": 0.3, "price_vnd": 5000}
 }
 
 
-def execute_academic_query(student_id: str) -> str:
-    """Thực thi tra cứu học vụ theo mã sinh viên"""
-    student = MOCK_DATABASE.get(student_id.strip().upper())
-    if student:
+def execute_nutrition_query(food_name: str, serving_size: str) -> str:
+    """Tra cứu dữ liệu dinh dưỡng mẫu cho một thực phẩm."""
+    normalized_name = food_name.strip().lower()
+    food = MOCK_FOOD_DATABASE.get(normalized_name)
+    if food:
         return json.dumps({
             "status": "SUCCESS",
-            "student_id": student_id,
-            "data": student
+            "food_name": food_name,
+            "serving_size": serving_size,
+            "data": food
         }, ensure_ascii=False)
-    else:
-        return json.dumps({
-            "status": "NOT_FOUND",
-            "message": f"Không tìm thấy dữ liệu sinh viên có mã '{student_id}'"
-        }, ensure_ascii=False)
+    return json.dumps({
+        "status": "NOT_FOUND",
+        "message": f"Chưa có dữ liệu dinh dưỡng mẫu cho '{food_name}'."
+    }, ensure_ascii=False)
 
 
-def execute_schedule_appointment(student_id: str, datetime_str: str, advisor_name: str = "PGS.TS Nguyễn Văn A") -> str:
-    """Thực thi đặt lịch hẹn tư vấn học vụ"""
+def execute_create_meal_plan(
+    calorie_target: float,
+    protein_target: float,
+    budget: float,
+    dietary_preferences: str = "",
+    age: int = 0,
+    height_cm: float = 0,
+    weight_kg: float = 0,
+    target_weight_kg: float = 0,
+    workout_days_per_week: int = 0,
+    pre_workout_meal: bool = True
+) -> str:
+    """Tạo thực đơn mẫu theo mục tiêu dinh dưỡng của người dùng."""
+    preferences = dietary_preferences or "Không có yêu cầu đặc biệt"
+    plan = [
+        {"meal": "Bữa sáng", "items": "2 trứng gà, 1 quả chuối, 1 hộp sữa chua", "calories": 436},
+        {"meal": "Bữa trưa", "items": "150g ức gà, 1 bát cơm trắng, rau xanh", "calories": 428},
+        {"meal": "Bữa trước tập", "items": "1 quả chuối, 1 hộp sữa chua và 2 lát bánh mì nguyên cám; dùng trước tập 60-90 phút", "calories": 310},
+        {"meal": "Bữa tối", "items": "100g ức gà, 1 bát cơm trắng, rau xanh", "calories": 345}
+    ]
+    total_plan_calories = sum(meal["calories"] for meal in plan)
     return json.dumps({
         "status": "SUCCESS",
-        "booking_id": f"BK-{student_id}-99",
-        "student_id": student_id,
-        "datetime": datetime_str,
-        "advisor": advisor_name,
-        "message": f"Đặt lịch thành công cho sinh viên {student_id} với {advisor_name} vào lúc {datetime_str}."
+        "target": {
+            "calories": calorie_target,
+            "protein_g": protein_target,
+            "budget_vnd": budget,
+            "dietary_preferences": preferences,
+            "profile": {
+                "age": age,
+                "height_cm": height_cm,
+                "weight_kg": weight_kg,
+                "target_weight_kg": target_weight_kg,
+                "workout_days_per_week": workout_days_per_week,
+                "pre_workout_meal": pre_workout_meal
+            }
+        },
+        "plan": plan,
+        "total_plan_calories": total_plan_calories,
+        "note": "Đây là thực đơn mẫu; cần chuyên gia dinh dưỡng tư vấn cho tình trạng y tế cụ thể."
     }, ensure_ascii=False)
 
 
 # Router gọi tool thực tế
 TOOL_ROUTER = {
-    "academic_query": execute_academic_query,
-    "schedule_appointment": execute_schedule_appointment
+    "nutrition_query": execute_nutrition_query,
+    "create_meal_plan": execute_create_meal_plan
 }
 
 def dispatch_tool_call(tool_name: str, arguments: Dict[str, Any]) -> str:

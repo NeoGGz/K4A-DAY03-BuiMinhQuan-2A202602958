@@ -62,7 +62,7 @@ Mục tiêu cốt lõi của Bài Lab này là giúp học viên tự tay phát 
 
 Thay vì chỉ sinh văn bản hội thoại đơn thuần như Chatbot cơ bản, tác tử (Agent) của bạn sẽ có khả năng:
 1. **Tự suy luận và chọn công cụ:** Chủ động kích hoạt vòng lặp ReAct (`Thought -> Action -> Observation`) qua giao thức **Model Context Protocol (MCP)** để truy vấn dữ liệu thực tế.
-2. **Tổng hợp câu trả lời chính xác:** Sử dụng dữ liệu thực tế từ Tool trả về để trả lời sinh viên, tránh hiện tượng ảo giác (Hallucination).
+2. **Tổng hợp câu trả lời chính xác:** Sử dụng dữ liệu dinh dưỡng từ Tool trả về để xây dựng thực đơn phù hợp, tránh hiện tượng ảo giác (Hallucination).
 3. **Trích xuất bằng chứng (Trace Log):** Ghi lại file vết `docs/trace_waterfall.json` chứng minh chuỗi suy luận từng bước của Agent.
 
 > 🌐 **GIAO THỨC MODEL CONTEXT PROTOCOL (MCP):**  
@@ -76,7 +76,7 @@ Học viên làm bài lần lượt theo đúng luồng 3 bước tinh giản d�
 
 | Bước | Tài liệu / Hành động | Nội dung thực hiện |
 | :---: | :--- | :--- |
-| **Bước 1** | 📄 **`README.md`** *(Hiện tại)* | Nắm quy chế, chạy Quickstart verify môi trường offline miễn phí. |
+| **Bước 1** | 📄 **`README.md`** *(Hiện tại)* | Nắm quy trình, chạy Quickstart và xác minh môi trường offline miễn phí. |
 | **Bước 2** | 🎓 **`docs/CODELAB.md`** | **[TRỌNG TÂM]** Chọn bài toán (Tham khảo gợi ý tại [docs/DANH_SACH_DE_TAI.md](docs/DANH_SACH_DE_TAI.md)) ➔ Phân tích Agentic Fit ➔ Điền `GEMINI_API_KEY` ➔ Code từng task theo checklist. |
 | **Bước 3** | 📊 **`docs/trace_eval.md`** | Chạy test suite với API thật, xuất trace log, hoàn thiện báo cáo thu hoạch duy nhất và push repo nộp bài. |
 
@@ -106,9 +106,9 @@ Học viên làm bài lần lượt theo đúng luồng 3 bước tinh giản d�
 ├── 📁 src/                      <-- 💻 MÃ NGUỒN PYTHON
 │   ├── 📄 mcp_server.py         <-- 🌐 MCP Server quản lý Tool Registry & JSON-RPC Dispatcher
 │   ├── 📄 tools.py              <-- 🛠️ Backend Tool Schemas JSON & Execution Layer
-│   ├── 📄 prompts.py            <-- 🛡️ System Prompts cho Chatbot và ReAct Agent
+│   ├── 📄 prompts.py            <-- 🛡️ Syent
 │   ├── 📄 providers.py          <-- 🔌 Multi-Provider LLM Adapter (Gemini/OpenAI/Mock)
-│   ├── 📄 app.py                <-- 🚀 MCP Client & Core Agent App ghép nối ReAct Loop & Trace Log
+│   ├── 📄 app.py                <-- 🚀 MCP Client & Core Agent App ghép nối ReAct stem Prompts cho Chatbot và ReAct AgLoop & Trace Log
 │   └── 📁 ai_levels/            <-- 📚 [REFERENCE ONLY] Code mẫu kiến trúc tham khảo (Không sửa/debug)
 │       └── 📄 README.md         <-- ⚠️ Chú thích mã nguồn tham khảo
 │

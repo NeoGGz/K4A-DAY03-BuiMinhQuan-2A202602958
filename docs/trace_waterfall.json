@@ -1,29 +1,193 @@
 [
   {
     "step": 1,
-    "query": "Chào bạn, bạn có thể giới thiệu quy chế học vụ cơ bản của Đại học VinUni không?",
+    "query": "Bạn có thể hướng dẫn nguyên tắc xây dựng một bữa ăn cân bằng không?",
     "action_type": "FINAL_ANSWER",
-    "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool.",
-    "output": "[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-    "latency_ms": 2845.93
+    "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Một bữa ăn cân bằng (quy tắc đĩa ăn cân bằng) cần cung cấp đầy đủ các nhóm dưỡng chất thiết yếu theo tỷ lệ hợp lý để duy trì năng lượng, sức khỏe và vóc dáng. Dưới đây là các nguyên tắc cốt lõi:\n\n---\n\n### 1. Quy tắc Đĩa ăn Cân bằng (MyPlate Rule)\nHình dung đĩa ăn của bạn được chia thành các phần như sau:\n\n* **1/2 Đĩa ăn – Rau củ & Trái cây (Xơ & Vi chất):**\n  * Ưu tiên rau xanh đa dạng màu sắc (cải bắp, bông cải xanh, cà chua, cà rốt,...).\n  * Cung cấp chất xơ, vitamin, khoáng chất giúp hỗ trợ tiêu hóa và tăng cường miễn dịch.\n\n* **1/4 Đĩa ăn – Tinh bột / Carbonhydrate phức hợp:**\n  * Chọn các nguồn tinh bột hấp thu chậm giàu xơ như: cơm gạo lức, khoai lang, yến mạch, bánh mì nguyên cám, bún/phở lứt.\n  * Hạn chế tinh bột tinh chế như đường, nước ngọt, bánh ngọt.\n\n* **1/4 Đĩa ăn – Chất đạm / Protein:**\n  * Chọn đạm nạc từ thịt gà (ức gà), thịt bò nạc, thịt heo nạc, cá, trứng, hải sản.\n  * Kết hợp thêm đạm thực vật từ các loại đậu, đậu phụ, hạt.\n\n---\n\n### 2. Chất béo tốt (Healthy Fats)\n* Dùng một lượng vừa phải chất béo không bão hòa từ dầu olive, dầu hạt bơ, các loại hạt (óc chó, hạnh nhân), cá hồi, quả bơ.\n* Hạn chế chất béo chuyển hóa (trans fat) từ đồ chiên rán nhiều dầu mỡ, đồ ăn nhanh, thực phẩm đóng gói.\n\n---\n\n### 3. Nước & Thức uống\n* Uống đủ nước lọc hàng ngày (khoảng 1.5 – 2 lit tùy thể trọng và mức độ vận động).\n* Hạn chế tối đa nước ngọt có gas, đồ uống chứa nhiều đường hoặc cồn.\n\n---\n\n### 4. Kiểm soát gia vị & Phương pháp chế biến\n* **Chế biến:** Ưu tiên luộc, hấp, áp chảo, nướng thay vì chiên ngập dầu.\n* **Gia vị:** Nêm nếm vừa phải, hạn chế ăn quá mặn (nhiều muối/nước mắm) hoặc quá ngọt.\n\n---\n\n*Lưu ý: Các nguyên tắc trên mang tính chất tham khảo chung. Nhu cầu cụ thể có thể thay đổi tùy thuộc vào độ tuổi, giới tính, mức độ vận động và mục tiêu sức khỏe cá nhân (tăng cân, giảm cân, tập luyện).*",
+    "latency_ms": 7594.9
   },
   {
     "step": 1,
-    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001.",
+    "query": "100g ức gà có bao nhiêu calories và protein?",
     "action_type": "TOOL_EXECUTION",
-    "tool_name": "academic_query",
+    "tool_name": "nutrition_query",
     "arguments": {
-      "student_id": "SV2026001"
+      "serving_size": "100g",
+      "food_name": "ức gà"
     },
-    "observation": {},
-    "latency_ms": 799.12
+    "observation": {
+      "status": "SUCCESS",
+      "food_name": "ức gà",
+      "serving_size": "100g",
+      "data": {
+        "calories": 165,
+        "protein_g": 31,
+        "carbs_g": 0,
+        "fat_g": 3.6,
+        "price_vnd": 18000
+      }
+    },
+    "latency_ms": 1946.07
   },
   {
     "step": 2,
-    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001.",
+    "query": "100g ức gà có bao nhiêu calories và protein?",
     "action_type": "FINAL_ANSWER",
     "thought": "Tổng hợp kết quả từ MCP Server thành công.",
-    "output": "Chưa thể trả lời chi tiết do chưa nhận được dữ liệu từ MCP Server (hãy hoàn thành TODO 2.1).",
+    "output": "ức gà (100g): 165 kcal, protein 31g, carb 0g, chất béo 3.6g.",
+    "latency_ms": 10.0
+  },
+  {
+    "step": 1,
+    "query": "Tạo thực đơn một ngày khoảng 2000 kcal, 100g protein, ngân sách 100000 đồng.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "create_meal_plan",
+    "arguments": {
+      "protein_target": 100,
+      "calorie_target": 2000,
+      "budget": 100000
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "target": {
+        "calories": 2000,
+        "protein_g": 100,
+        "budget_vnd": 100000,
+        "dietary_preferences": "Không có yêu cầu đặc biệt",
+        "profile": {
+          "age": 0,
+          "height_cm": 0,
+          "weight_kg": 0,
+          "target_weight_kg": 0,
+          "workout_days_per_week": 0,
+          "pre_workout_meal": true
+        }
+      },
+      "plan": [
+        {
+          "meal": "Bữa sáng",
+          "items": "2 trứng gà, 1 quả chuối, 1 hộp sữa chua",
+          "calories": 436
+        },
+        {
+          "meal": "Bữa trưa",
+          "items": "150g ức gà, 1 bát cơm trắng, rau xanh",
+          "calories": 428
+        },
+        {
+          "meal": "Bữa trước tập",
+          "items": "1 quả chuối, 1 hộp sữa chua và 2 lát bánh mì nguyên cám; dùng trước tập 60-90 phút",
+          "calories": 310
+        },
+        {
+          "meal": "Bữa tối",
+          "items": "100g ức gà, 1 bát cơm trắng, rau xanh",
+          "calories": 345
+        }
+      ],
+      "total_plan_calories": 1519,
+      "note": "Đây là thực đơn mẫu; cần chuyên gia dinh dưỡng tư vấn cho tình trạng y tế cụ thể."
+    },
+    "latency_ms": 1869.51
+  },
+  {
+    "step": 2,
+    "query": "Tạo thực đơn một ngày khoảng 2000 kcal, 100g protein, ngân sách 100000 đồng.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Tổng hợp kết quả từ MCP Server thành công.",
+    "output": "Thực đơn tham khảo (mục tiêu 2000 kcal, 100g protein/ngày)\n- Bữa sáng (436 kcal): 2 trứng gà, 1 quả chuối, 1 hộp sữa chua\n- Bữa trưa (428 kcal): 150g ức gà, 1 bát cơm trắng, rau xanh\n- Bữa trước tập (310 kcal): 1 quả chuối, 1 hộp sữa chua và 2 lát bánh mì nguyên cám; dùng trước tập 60-90 phút\n- Bữa tối (345 kcal): 100g ức gà, 1 bát cơm trắng, rau xanh\nTổng thực đơn mẫu: 1519 kcal.",
+    "latency_ms": 10.0
+  },
+  {
+    "step": 1,
+    "query": "Tạo thực đơn tăng cơ 2200 kcal, không ăn cá và ưu tiên món dễ nấu.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "create_meal_plan",
+    "arguments": {
+      "calorie_target": 2800,
+      "protein_target": 130,
+      "budget": 120000,
+      "dietary_preferences": "",
+      "age": 21,
+      "height_cm": 170,
+      "weight_kg": 50,
+      "target_weight_kg": 70,
+      "workout_days_per_week": 5,
+      "pre_workout_meal": true
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "target": {
+        "calories": 2800,
+        "protein_g": 130,
+        "budget_vnd": 120000,
+        "dietary_preferences": "Không có yêu cầu đặc biệt",
+        "profile": {
+          "age": 21,
+          "height_cm": 170,
+          "weight_kg": 50,
+          "target_weight_kg": 70,
+          "workout_days_per_week": 5,
+          "pre_workout_meal": true
+        }
+      },
+      "plan": [
+        {
+          "meal": "Bữa sáng",
+          "items": "2 trứng gà, 1 quả chuối, 1 hộp sữa chua",
+          "calories": 436
+        },
+        {
+          "meal": "Bữa trưa",
+          "items": "150g ức gà, 1 bát cơm trắng, rau xanh",
+          "calories": 428
+        },
+        {
+          "meal": "Bữa trước tập",
+          "items": "1 quả chuối, 1 hộp sữa chua và 2 lát bánh mì nguyên cám; dùng trước tập 60-90 phút",
+          "calories": 310
+        },
+        {
+          "meal": "Bữa tối",
+          "items": "100g ức gà, 1 bát cơm trắng, rau xanh",
+          "calories": 345
+        }
+      ],
+      "total_plan_calories": 1519,
+      "note": "Đây là thực đơn mẫu; cần chuyên gia dinh dưỡng tư vấn cho tình trạng y tế cụ thể."
+    },
+    "latency_ms": 447.86
+  },
+  {
+    "step": 2,
+    "query": "Tạo thực đơn tăng cơ 2200 kcal, không ăn cá và ưu tiên món dễ nấu.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Tổng hợp kết quả từ MCP Server thành công.",
+    "output": "Thực đơn tham khảo (mục tiêu 2800 kcal, 130g protein/ngày)\n- Bữa sáng (436 kcal): 2 trứng gà, 1 quả chuối, 1 hộp sữa chua\n- Bữa trưa (428 kcal): 150g ức gà, 1 bát cơm trắng, rau xanh\n- Bữa trước tập (310 kcal): 1 quả chuối, 1 hộp sữa chua và 2 lát bánh mì nguyên cám; dùng trước tập 60-90 phút\n- Bữa tối (345 kcal): 100g ức gà, 1 bát cơm trắng, rau xanh\nTổng thực đơn mẫu: 1519 kcal.",
+    "latency_ms": 10.0
+  },
+  {
+    "step": 1,
+    "query": "Tra cứu dinh dưỡng của món bánh đặc biệt XYZ không có trong dữ liệu mẫu.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "nutrition_query",
+    "arguments": {
+      "food_name": "bánh đặc biệt XYZ",
+      "serving_size": "1 phần"
+    },
+    "observation": {
+      "status": "NOT_FOUND",
+      "message": "Chưa có dữ liệu dinh dưỡng mẫu cho 'bánh đặc biệt XYZ'."
+    },
+    "latency_ms": 450.34
+  },
+  {
+    "step": 2,
+    "query": "Tra cứu dinh dưỡng của món bánh đặc biệt XYZ không có trong dữ liệu mẫu.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Tổng hợp kết quả từ MCP Server thành công.",
+    "output": "Chưa có dữ liệu dinh dưỡng mẫu cho 'bánh đặc biệt XYZ'.",
     "latency_ms": 10.0
   }
 ]
