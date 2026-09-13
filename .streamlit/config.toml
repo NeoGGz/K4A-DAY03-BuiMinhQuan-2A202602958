@@ -1,0 +1,20 @@
+[theme]
+base = "light"
+primaryColor = "#D85C3A"
+backgroundColor = "#FBF8F3"
+secondaryBackgroundColor = "#F2EDE4"
+textColor = "#2B2926"
+borderColor = "#D9D0C5"
+linkColor = "#B64B30"
+font = "'DM Sans':https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
+headingFont = "'Space Grotesk':https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap"
+baseRadius = "medium"
+buttonRadius = "medium"
+showWidgetBorder = true
+showSidebarBorder = true
+
+[theme.sidebar]
+backgroundColor = "#F2EDE4"
+secondaryBackgroundColor = "#FBF8F3"
+textColor = "#2B2926"
+primaryColor = "#D85C3A"
